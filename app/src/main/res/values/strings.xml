@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">EcoSnap</string>
+    <string name="login_title">EcoSnap</string>
+    <string name="login_subtitle">Bergabunglah &amp; bagikan aksi peduli lingkunganmu!</string>
+    <string name="sign_in_with_google">Masuk dengan Google</string>
+    <string name="feed_title">Feed Aksi Lingkungan</string>
+    <string name="profile_title">Profil Saya</string>
+    <string name="create_post_title">Bagikan Aksimu</string>
+    <string name="edit_post_title">Edit Postingan</string>
+    <string name="description_hint">Ceritakan aksi lingkunganmu...</string>
+    <string name="post_button">Posting</string>
+    <string name="save_button">Simpan</string>
+    <string name="cancel_button">Batal</string>
+    <string name="delete_confirm_title">Hapus Postingan?</string>
+    <string name="delete_confirm_message">Apakah kamu yakin ingin menghapus postingan ini?</string>
+    <string name="delete_button">Hapus</string>
+    <string name="no_internet">Tidak ada koneksi internet</string>
+    <string name="loading">Memuat...</string>
+    <string name="logout">Keluar</string>
+    <string name="pick_image">Pilih Gambar</string>
+    <string name="no_posts">Belum ada postingan. Jadilah yang pertama!</string>
+    <string name="error_generic">Terjadi kesalahan. Coba lagi.</string>
 </resources>
