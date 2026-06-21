@@ -46,7 +46,7 @@ import com.jannahkurniawati0024.ecosnap.utils.AuthManager
 fun FeedScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToProfile: () -> Unit,
-    onNavigateToEdit: (String, String) -> Unit,
+    onNavigateToEdit: (String, String, String, String, String, String, String) -> Unit,
     feedViewModel: FeedViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -91,7 +91,7 @@ fun FeedScreen(
                 containerColor = Color(0xFF2E7D32),
                 contentColor = Color.White
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Buat Postingan")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Buat Postingan")
             }
         },
         containerColor = Color(0xFFF1F8E9)
@@ -149,7 +149,15 @@ fun FeedScreen(
                                     )
                                 },
                                 onEditClick = { editPost ->
-                                    onNavigateToEdit(editPost.id, editPost.description)
+                                    onNavigateToEdit(
+                                        editPost.id,
+                                        editPost.description,
+                                        editPost.userName,
+                                        editPost.userEmail,
+                                        editPost.userPhotoUrl,
+                                        editPost.imageUrl,
+                                        editPost.createdAt
+                                    )
                                 }
                             )
                         }

@@ -2,11 +2,9 @@ package com.jannahkurniawati0024.ecosnap.data.repository
 
 import com.jannahkurniawati0024.ecosnap.data.api.RetrofitInstance
 import com.jannahkurniawati0024.ecosnap.data.model.Post
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PostRepository {
 
@@ -15,23 +13,10 @@ class PostRepository {
     suspend fun getFeed(): Result<List<Post>> {
         return try {
             val response = api.getFeed()
-            if (response.isSuccessful && response.body()?.success == true) {
-                Result.success(response.body()!!.data)
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: emptyList())
             } else {
-                Result.failure(Exception(response.body()?.message ?: "Gagal memuat feed"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getUserPosts(userId: String): Result<List<Post>> {
-        return try {
-            val response = api.getPosts(userId)
-            if (response.isSuccessful && response.body()?.success == true) {
-                Result.success(response.body()!!.data)
-            } else {
-                Result.failure(Exception(response.body()?.message ?: "Gagal memuat postingan"))
+                Result.failure(Exception("Gagal memuat feed"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -44,25 +29,28 @@ class PostRepository {
         userName: String,
         userPhotoUrl: String,
         description: String,
-        imageFile: File
+        imageUrl: String
     ): Result<Post> {
         return try {
-            val userIdBody = userId.toRequestBody("text/plain".toMediaTypeOrNull())
-            val userEmailBody = userEmail.toRequestBody("text/plain".toMediaTypeOrNull())
-            val userNameBody = userName.toRequestBody("text/plain".toMediaTypeOrNull())
-            val userPhotoUrlBody = userPhotoUrl.toRequestBody("text/plain".toMediaTypeOrNull())
-            val descriptionBody = description.toRequestBody("text/plain".toMediaTypeOrNull())
-            val imageRequestBody = imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-            val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, imageRequestBody)
+            val dateStr = SimpleDateFormat(
+                "dd MMM yyyy, HH:mm",
+                Locale("id", "ID")
+            ).format(Date())
 
-            val response = api.createPost(
-                userIdBody, userEmailBody, userNameBody,
-                userPhotoUrlBody, descriptionBody, imagePart
+            val post = Post(
+                userId = userId,
+                userEmail = userEmail,
+                userName = userName,
+                userPhotoUrl = userPhotoUrl,
+                description = description,
+                imageUrl = imageUrl,
+                createdAt = dateStr
             )
-            if (response.isSuccessful && response.body()?.success == true) {
-                Result.success(response.body()!!.data!!)
+            val response = api.createPost(post)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
             } else {
-                Result.failure(Exception(response.body()?.message ?: "Gagal membuat postingan"))
+                Result.failure(Exception("Gagal membuat postingan"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -72,14 +60,29 @@ class PostRepository {
     suspend fun updatePost(
         postId: String,
         description: String,
-        userId: String
+        userId: String,
+        userName: String,
+        userEmail: String,
+        userPhotoUrl: String,
+        imageUrl: String,
+        createdAt: String
     ): Result<Post> {
         return try {
-            val response = api.updatePost(postId, description, userId)
-            if (response.isSuccessful && response.body()?.success == true) {
-                Result.success(response.body()!!.data!!)
+            val post = Post(
+                id = postId,
+                userId = userId,
+                userName = userName,
+                userEmail = userEmail,
+                userPhotoUrl = userPhotoUrl,
+                description = description,
+                imageUrl = imageUrl,
+                createdAt = createdAt
+            )
+            val response = api.updatePost(postId, post)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
             } else {
-                Result.failure(Exception(response.body()?.message ?: "Gagal mengedit postingan"))
+                Result.failure(Exception("Gagal mengedit postingan"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -88,11 +91,11 @@ class PostRepository {
 
     suspend fun deletePost(postId: String, userId: String): Result<Boolean> {
         return try {
-            val response = api.deletePost(postId, userId)
-            if (response.isSuccessful && response.body()?.success == true) {
+            val response = api.deletePost(postId)
+            if (response.isSuccessful) {
                 Result.success(true)
             } else {
-                Result.failure(Exception(response.body()?.message ?: "Gagal menghapus postingan"))
+                Result.failure(Exception("Gagal menghapus postingan"))
             }
         } catch (e: Exception) {
             Result.failure(e)

@@ -1,17 +1,20 @@
 package com.jannahkurniawati0024.ecosnap.ui.create
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jannahkurniawati0024.ecosnap.data.repository.PostRepository
+import com.jannahkurniawati0024.ecosnap.utils.CloudinaryUploader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 
 data class CreatePostUiState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val uploadProgress: String = ""
 )
 
 class CreatePostViewModel : ViewModel() {
@@ -22,12 +25,13 @@ class CreatePostViewModel : ViewModel() {
     val uiState: StateFlow<CreatePostUiState> = _uiState
 
     fun createPost(
+        context: Context,
         userId: String,
         userEmail: String,
         userName: String,
         userPhotoUrl: String,
         description: String,
-        imageFile: File
+        imageUri: Uri
     ) {
         if (description.isBlank()) {
             _uiState.value = _uiState.value.copy(
@@ -35,22 +39,49 @@ class CreatePostViewModel : ViewModel() {
             )
             return
         }
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val result = repository.createPost(
-                userId, userEmail, userName, userPhotoUrl, description, imageFile
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                uploadProgress = "Mengupload gambar..."
             )
-            result.fold(
-                onSuccess = {
+
+            val uploadResult = CloudinaryUploader.uploadImage(context, imageUri)
+
+            uploadResult.fold(
+                onSuccess = { imageUrl ->
                     _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isSuccess = true
+                        uploadProgress = "Menyimpan postingan..."
+                    )
+
+                    val postResult = repository.createPost(
+                        userId, userEmail, userName,
+                        userPhotoUrl, description, imageUrl
+                    )
+
+                    postResult.fold(
+                        onSuccess = {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                isSuccess = true,
+                                uploadProgress = ""
+                            )
+                        },
+                        onFailure = { error ->
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                errorMessage = error.message ?: "Gagal menyimpan postingan",
+                                uploadProgress = ""
+                            )
+                        }
                     )
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = error.message ?: "Gagal membuat postingan"
+                        errorMessage = "Gagal upload gambar: ${error.message}",
+                        uploadProgress = ""
                     )
                 }
             )

@@ -20,7 +20,16 @@ class EditPostViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(EditPostUiState())
     val uiState: StateFlow<EditPostUiState> = _uiState
 
-    fun updatePost(postId: String, description: String, userId: String) {
+    fun updatePost(
+        postId: String,
+        description: String,
+        userId: String,
+        userName: String,
+        userEmail: String,
+        userPhotoUrl: String,
+        imageUrl: String,
+        createdAt: String
+    ) {
         if (description.isBlank()) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Deskripsi tidak boleh kosong"
@@ -29,7 +38,11 @@ class EditPostViewModel : ViewModel() {
         }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val result = repository.updatePost(postId, description, userId)
+            val result = repository.updatePost(
+                postId, description, userId,
+                userName, userEmail, userPhotoUrl,
+                imageUrl, createdAt
+            )
             result.fold(
                 onSuccess = {
                     _uiState.value = _uiState.value.copy(

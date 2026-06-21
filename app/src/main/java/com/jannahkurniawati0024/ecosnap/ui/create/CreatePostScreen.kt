@@ -1,6 +1,8 @@
 package com.jannahkurniawati0024.ecosnap.ui.create
 
+import android.Manifest
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
@@ -8,23 +10,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -46,13 +53,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.jannahkurniawati0024.ecosnap.R
-import com.jannahkurniawati0024.ecosnap.ui.components.LoadingOverlay
 import com.jannahkurniawati0024.ecosnap.utils.AuthManager
-import com.jannahkurniawati0024.ecosnap.utils.ImageUtils
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,11 +77,43 @@ fun CreatePostScreen(
 
     var description by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    val imagePickerLauncher = rememberLauncherForActivityResult(
+    val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        selectedImageUri = uri
+        uri?.let { selectedImageUri = it }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            selectedImageUri = cameraImageUri
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val photoFile = File.createTempFile("camera_", ".jpg", context.cacheDir)
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                photoFile
+            )
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            galleryLauncher.launch("image/*")
+        }
     }
 
     LaunchedEffect(uiState.isSuccess) {
@@ -94,7 +135,7 @@ fun CreatePostScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Kembali",
                             tint = Color.White
                         )
@@ -126,8 +167,7 @@ fun CreatePostScreen(
                             if (selectedImageUri != null) Color(0xFF2E7D32)
                             else Color.LightGray,
                             RoundedCornerShape(16.dp)
-                        )
-                        .clickable { imagePickerLauncher.launch("image/*") },
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     if (selectedImageUri != null) {
@@ -138,19 +178,67 @@ fun CreatePostScreen(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Icon(
-                                Icons.Default.Image,
+                                imageVector = Icons.Default.Image,
                                 contentDescription = null,
                                 modifier = Modifier.size(48.dp),
                                 tint = Color.Gray
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = stringResource(R.string.pick_image),
-                                color = Color.Gray
+                                text = "Pilih gambar dari kamera atau galeri",
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp
                             )
                         }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            tint = Color(0xFF2E7D32),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Kamera", color = Color(0xFF2E7D32))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                Manifest.permission.READ_MEDIA_IMAGES
+                            } else {
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            }
+                            storagePermissionLauncher.launch(permission)
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = null,
+                            tint = Color(0xFF2E7D32),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Galeri", color = Color(0xFF2E7D32))
                     }
                 }
 
@@ -173,20 +261,36 @@ fun CreatePostScreen(
                     Text(text = it, color = Color.Red)
                 }
 
+                if (uiState.isLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFF2E7D32),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = uiState.uploadProgress,
+                            color = Color(0xFF2E7D32)
+                        )
+                    }
+                }
+
                 Button(
                     onClick = {
-                        val imageFile = selectedImageUri?.let { uri ->
-                            ImageUtils.uriToFile(context, uri)
-                        }
-                        if (imageFile == null) return@Button
+                        val uri = selectedImageUri ?: return@Button
                         userProfile?.let { user ->
                             createPostViewModel.createPost(
+                                context = context,
                                 userId = user.id,
                                 userEmail = user.email,
                                 userName = user.name,
                                 userPhotoUrl = user.photoUrl,
                                 description = description,
-                                imageFile = imageFile
+                                imageUri = uri
                             )
                         }
                     },
@@ -207,10 +311,6 @@ fun CreatePostScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
-
-            if (uiState.isLoading) {
-                LoadingOverlay()
             }
         }
     }

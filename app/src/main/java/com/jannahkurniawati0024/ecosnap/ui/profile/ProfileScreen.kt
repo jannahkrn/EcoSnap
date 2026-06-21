@@ -120,7 +120,6 @@ fun ProfileScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                        // Foto profil circle
                         AsyncImage(
                             model = userProfile?.photoUrl,
                             contentDescription = "Foto Profil",

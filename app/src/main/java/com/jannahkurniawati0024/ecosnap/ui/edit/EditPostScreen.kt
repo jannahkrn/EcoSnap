@@ -46,6 +46,11 @@ import com.jannahkurniawati0024.ecosnap.utils.AuthManager
 fun EditPostScreen(
     postId: String,
     initialDescription: String,
+    userName: String,
+    userEmail: String,
+    userPhotoUrl: String,
+    imageUrl: String,
+    createdAt: String,
     onEditSuccess: () -> Unit,
     onBack: () -> Unit,
     editPostViewModel: EditPostViewModel = viewModel()
@@ -76,7 +81,7 @@ fun EditPostScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Kembali",
                             tint = Color.White
                         )
@@ -96,7 +101,6 @@ fun EditPostScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
                 Text(
                     text = "Edit deskripsi aksi lingkunganmu:",
                     fontWeight = FontWeight.Medium,
@@ -143,7 +147,12 @@ fun EditPostScreen(
                                 editPostViewModel.updatePost(
                                     postId = postId,
                                     description = description,
-                                    userId = user.id
+                                    userId = user.id,
+                                    userName = userName,
+                                    userEmail = userEmail,
+                                    userPhotoUrl = userPhotoUrl,
+                                    imageUrl = imageUrl,
+                                    createdAt = createdAt
                                 )
                             }
                         },

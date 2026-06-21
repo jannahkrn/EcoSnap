@@ -1,9 +1,7 @@
 package com.jannahkurniawati0024.ecosnap.data.model
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
 
-@JsonClass(generateAdapter = true)
 data class Post(
     @Json(name = "id") val id: String = "",
     @Json(name = "userId") val userId: String = "",
@@ -15,22 +13,19 @@ data class Post(
     @Json(name = "createdAt") val createdAt: String = ""
 )
 
-@JsonClass(generateAdapter = true)
 data class PostResponse(
-    @Json(name = "success") val success: Boolean = false,
-    @Json(name = "message") val message: String = "",
-    @Json(name = "data") val data: Post? = null
+    val success: Boolean = true,
+    val message: String = "",
+    val data: Post? = null
 )
 
-@JsonClass(generateAdapter = true)
 data class PostListResponse(
-    @Json(name = "success") val success: Boolean = false,
-    @Json(name = "message") val message: String = "",
-    @Json(name = "data") val data: List<Post> = emptyList()
+    val success: Boolean = true,
+    val message: String = "",
+    val data: List<Post> = emptyList()
 )
 
-@JsonClass(generateAdapter = true)
 data class DeleteResponse(
-    @Json(name = "success") val success: Boolean = false,
-    @Json(name = "message") val message: String = ""
+    val success: Boolean = true,
+    val message: String = ""
 )
