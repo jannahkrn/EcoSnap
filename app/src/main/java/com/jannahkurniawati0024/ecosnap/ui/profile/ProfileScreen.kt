@@ -42,6 +42,7 @@ import coil.compose.AsyncImage
 import com.jannahkurniawati0024.ecosnap.R
 import com.jannahkurniawati0024.ecosnap.utils.AuthManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import coil.compose.SubcomposeAsyncImage
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.coroutines.launch
 
@@ -120,16 +121,49 @@ fun ProfileScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                        AsyncImage(
-                            model = userProfile?.photoUrl,
-                            contentDescription = "Foto Profil",
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
-                                .background(Color.White),
-                            contentScale = ContentScale.Crop
-                        )
+                        val profileInitial = userProfile?.name?.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
 
+                        if (!userProfile?.photoUrl.isNullOrEmpty()) {
+                            SubcomposeAsyncImage(
+                                model = userProfile?.photoUrl,
+                                contentDescription = "Foto Profil",
+                                modifier = Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop,
+                                error = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(96.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF1565C0)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = profileInitial,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 36.sp
+                                        )
+                                    }
+                                }
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF1565C0)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = profileInitial,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 36.sp
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(

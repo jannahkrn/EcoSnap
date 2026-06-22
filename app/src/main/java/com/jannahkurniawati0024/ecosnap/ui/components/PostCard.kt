@@ -1,5 +1,7 @@
 package com.jannahkurniawati0024.ecosnap.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,8 +37,71 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.jannahkurniawati0024.ecosnap.R
 import com.jannahkurniawati0024.ecosnap.data.model.Post
+
+@Composable
+fun UserAvatar(
+    photoUrl: String,
+    userName: String,
+    modifier: Modifier = Modifier
+) {
+    val initial = userName.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
+
+    val avatarColor = remember(userName) {
+        val colors = listOf(
+            Color(0xFF1565C0),
+            Color(0xFF6A1B9A),
+            Color(0xFF00695C),
+            Color(0xFFE65100),
+            Color(0xFFC62828),
+            Color(0xFF283593),
+            Color(0xFF4E342E),
+            Color(0xFF558B2F),
+        )
+        colors[(userName.length) % colors.size]
+    }
+
+    if (photoUrl.isNotEmpty()) {
+        SubcomposeAsyncImage(
+            model = photoUrl,
+            contentDescription = "Foto profil $userName",
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+            error = {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(avatarColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = initial,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+            }
+        )
+    } else {
+        Box(
+            modifier = modifier
+                .clip(CircleShape)
+                .background(avatarColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initial,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        }
+    }
+}
 
 @Composable
 fun PostCard(
@@ -62,13 +127,12 @@ fun PostCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AsyncImage(
-                    model = post.userPhotoUrl.ifEmpty { null },
-                    contentDescription = "Foto profil ${post.userName}",
+                UserAvatar(
+                    photoUrl = post.userPhotoUrl,
+                    userName = post.userName.ifEmpty { "Pengguna" },
                     modifier = Modifier
                         .size(44.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                        .clip(CircleShape)
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
