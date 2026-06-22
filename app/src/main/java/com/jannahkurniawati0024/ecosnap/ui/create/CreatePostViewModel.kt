@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jannahkurniawati0024.ecosnap.data.repository.PostRepository
 import com.jannahkurniawati0024.ecosnap.utils.CloudinaryUploader
+import com.jannahkurniawati0024.ecosnap.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,6 +37,14 @@ class CreatePostViewModel : ViewModel() {
         if (description.isBlank()) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Deskripsi tidak boleh kosong"
+            )
+            return
+        }
+
+        // ✅ Cek koneksi internet sebelum upload
+        if (!NetworkUtils.isInternetAvailable(context)) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Tidak ada koneksi internet. Periksa jaringan kamu dan coba lagi."
             )
             return
         }
