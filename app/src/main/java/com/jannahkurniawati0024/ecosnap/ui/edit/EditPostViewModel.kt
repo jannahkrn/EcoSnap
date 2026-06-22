@@ -1,8 +1,10 @@
 package com.jannahkurniawati0024.ecosnap.ui.edit
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.jannahkurniawati0024.ecosnap.data.repository.PostRepository
+import com.jannahkurniawati0024.ecosnap.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -13,7 +15,8 @@ data class EditPostUiState(
     val errorMessage: String? = null
 )
 
-class EditPostViewModel : ViewModel() {
+// ✅ Ganti ViewModel -> AndroidViewModel
+class EditPostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepository()
 
@@ -36,6 +39,15 @@ class EditPostViewModel : ViewModel() {
             )
             return
         }
+
+        // ✅ Cek koneksi internet sebelum update
+        if (!NetworkUtils.isInternetAvailable(getApplication())) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Tidak ada koneksi internet. Tidak dapat menyimpan perubahan."
+            )
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             val result = repository.updatePost(
