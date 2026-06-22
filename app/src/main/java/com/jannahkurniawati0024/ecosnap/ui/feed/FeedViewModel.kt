@@ -16,7 +16,6 @@ data class FeedUiState(
     val errorMessage: String? = null
 )
 
-// ✅ Ganti ViewModel -> AndroidViewModel agar bisa akses Context untuk cek internet
 class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepository()
@@ -29,7 +28,6 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadFeed() {
-        // ✅ Cek koneksi internet sebelum request
         if (!NetworkUtils.isInternetAvailable(getApplication())) {
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
@@ -59,7 +57,6 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deletePost(post: Post, userId: String) {
-        // ✅ Cek koneksi internet sebelum delete
         if (!NetworkUtils.isInternetAvailable(getApplication())) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Tidak ada koneksi internet. Tidak dapat menghapus postingan."

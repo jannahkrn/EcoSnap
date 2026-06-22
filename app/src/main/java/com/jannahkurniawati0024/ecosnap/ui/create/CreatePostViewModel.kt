@@ -41,7 +41,6 @@ class CreatePostViewModel : ViewModel() {
             return
         }
 
-        // ✅ Cek koneksi internet sebelum upload
         if (!NetworkUtils.isInternetAvailable(context)) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Tidak ada koneksi internet. Periksa jaringan kamu dan coba lagi."

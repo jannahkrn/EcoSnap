@@ -15,7 +15,6 @@ data class EditPostUiState(
     val errorMessage: String? = null
 )
 
-// ✅ Ganti ViewModel -> AndroidViewModel
 class EditPostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepository()
@@ -40,7 +39,6 @@ class EditPostViewModel(application: Application) : AndroidViewModel(application
             return
         }
 
-        // ✅ Cek koneksi internet sebelum update
         if (!NetworkUtils.isInternetAvailable(getApplication())) {
             _uiState.value = _uiState.value.copy(
                 errorMessage = "Tidak ada koneksi internet. Tidak dapat menyimpan perubahan."

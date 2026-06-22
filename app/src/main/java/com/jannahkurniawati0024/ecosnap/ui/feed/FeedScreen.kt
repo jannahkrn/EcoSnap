@@ -58,7 +58,6 @@ fun FeedScreen(
     val userProfile by authManager.userProfileFlow.collectAsState(initial = null)
     val uiState by feedViewModel.uiState.collectAsState()
 
-    // ✅ Auto-refresh setiap kali FeedScreen kembali ke foreground (ON_RESUME)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
